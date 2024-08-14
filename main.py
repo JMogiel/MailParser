@@ -53,7 +53,7 @@ def parse_email_body(service, message_id):
 
 
 def send_api_request(command, phone_number):
-    api_url = 'https://api.example.com/endpoint'  # Replace with your API URL
+    api_url = 'http://127.0.0.1:8000/endpoint'  # Replace with your API URL
     payload = {'command': command, 'phone_number': phone_number}
     headers = {'Content-Type': 'application/json'}
     response = requests.post(api_url, data=json.dumps(payload), headers=headers)
