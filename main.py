@@ -7,9 +7,12 @@ import base64
 import re
 import os.path
 import json
+import asyncio
+import aiohttp
+
 
 # If modifying these SCOPES, delete the file token.json.
-SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+SCOPES = ['https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.labels']
 
 
 def authenticate_gmail():
@@ -34,6 +37,10 @@ def get_unread_emails(service):
     return messages
 
 
+def mark_email_as_read(service, message):
+    service.users().messages().modify(userId='me', id=message['id'], body={'removeLabelIds': ['UNREAD']}).execute()
+
+
 def parse_email_body(service, message_id):
     message = service.users().messages().get(userId='me', id=message_id).execute()
     payload = message['payload']
@@ -52,27 +59,41 @@ def parse_email_body(service, message_id):
     return None, None
 
 
-def send_api_request(command, phone_number):
+async def send_api_request(command, phone_number):
     api_url = 'http://127.0.0.1:8000/endpoint'  # Replace with your API URL
     payload = {'command': command, 'phone_number': phone_number}
     headers = {'Content-Type': 'application/json'}
-    response = requests.post(api_url, data=json.dumps(payload), headers=headers)
-    return response.status_code, response.text
+
+    # Asynchronous POST method
+    async with aiohttp.ClientSession() as session:
+        async with session.post(api_url, json=payload, headers=headers) as response:
+            response_text = await response.text()
+            return response.status, response_text
 
 
-def main():
+async def main():
     creds = authenticate_gmail()
     service = build('gmail', 'v1', credentials=creds)
 
     messages = get_unread_emails(service)
+    tasks = []
+
     for msg in messages:
         command, phone_number = parse_email_body(service, msg['id'])
         if command and phone_number:
-            status_code, response_text = send_api_request(command, phone_number)
-            print(f'API Request Status: {status_code}, Response: {response_text}')
+            task = send_api_request(command, phone_number)
+            tasks.append(task)
+            mark_email_as_read(service, msg)
         else:
             print('No valid command found in the email.')
 
+        # Execute all API requests concurrently
+    results = await asyncio.gather(*tasks)
 
-if __name__ == '__main__':
-    main()
+    for status_code, response_text in results:
+        print(f'API Request Status: {status_code}, Response: {response_text}')
+
+
+# Entry point to run the asynchronous main function
+if __name__ == "__main__":
+    asyncio.run(main())
