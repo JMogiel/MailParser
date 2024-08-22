@@ -2,17 +2,14 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
-import requests
 import base64
 import re
 import os.path
-import json
 import asyncio
 import aiohttp
 
-
 # If modifying these SCOPES, delete the file token.json.
-SCOPES = ['https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.labels']
+SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
 
 
 def authenticate_gmail():
@@ -87,8 +84,9 @@ async def main():
         else:
             print('No valid command found in the email.')
 
-        # Execute all API requests concurrently
+    # Execute all API requests concurrently
     results = await asyncio.gather(*tasks)
+    print(results)
 
     for status_code, response_text in results:
         print(f'API Request Status: {status_code}, Response: {response_text}')

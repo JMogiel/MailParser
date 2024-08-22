@@ -1,4 +1,7 @@
+import random
+
 from flask import Flask, request, jsonify
+import time
 
 app = Flask(__name__)
 
@@ -11,8 +14,7 @@ def receive_feedback():
     phone_number = data.get('phone_number')
 
     # Log received data (for debugging purposes)
-    print(f"Received command: {command}")
-    print(f"Received phone number: {phone_number}")
+    print(f"Received command: {command}, Received phone number: {phone_number}")
 
     # Mock response to be returned
     response = {
