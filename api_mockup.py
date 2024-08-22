@@ -1,7 +1,7 @@
 import random
+import time
 
 from flask import Flask, request, jsonify
-import time
 
 app = Flask(__name__)
 
@@ -15,6 +15,11 @@ def receive_feedback():
 
     # Log received data (for debugging purposes)
     print(f"Received command: {command}, Received phone number: {phone_number}")
+
+    # Random delay in response
+    delay = random.randint(30, 120)
+    print(f"Delaying response by {delay:.2f} seconds...")
+    time.sleep(delay)
 
     # Mock response to be returned
     response = {

@@ -80,13 +80,12 @@ async def main():
         if command and phone_number:
             task = send_api_request(command, phone_number)
             tasks.append(task)
-            mark_email_as_read(service, msg)
+            #mark_email_as_read(service, msg)
         else:
             print('No valid command found in the email.')
 
     # Execute all API requests concurrently
     results = await asyncio.gather(*tasks)
-    print(results)
 
     for status_code, response_text in results:
         print(f'API Request Status: {status_code}, Response: {response_text}')
