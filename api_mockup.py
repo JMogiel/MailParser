@@ -5,6 +5,9 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
+# Store the order of processed phone numbers
+processed_phone_numbers = []
+
 
 @app.route('/endpoint', methods=['POST'])
 def receive_feedback():
@@ -20,6 +23,13 @@ def receive_feedback():
     delay = random.randint(30, 120)
     print(f"Delaying response by {delay:.2f} seconds...")
     time.sleep(delay)
+
+    # Store the phone number after processing
+    processed_phone_numbers.append(phone_number)
+
+    # Check if this is the first processed phone number
+    if len(processed_phone_numbers) == 1:
+        print(f"Phone number {phone_number} was processed first")
 
     # Mock response to be returned
     response = {
